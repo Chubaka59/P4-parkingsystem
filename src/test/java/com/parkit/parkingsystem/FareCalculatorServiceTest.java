@@ -57,7 +57,7 @@ public class FareCalculatorServiceTest {
     }
 
     @Test
-    public void calculateFareUnkownType(){
+    public void calculateFareUnknownType(){
         Date inTime = new Date();
         inTime.setTime( System.currentTimeMillis() - (  60 * 60 * 1000) );
         Date outTime = new Date();
