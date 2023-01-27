@@ -146,4 +146,18 @@ public class FareCalculatorServiceTest {
         assertEquals(new BigDecimal(0).setScale(2,RoundingMode.HALF_DOWN), ticket.getPrice());
     }
 
+    @Test
+    public void calculateFareBikeWithLessThanThirtyMinutes(){
+        Date inTime = new Date();
+        inTime.setTime( System.currentTimeMillis() - (  15 * 60 * 1000) );
+        Date outTime = new Date();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE,false);
+
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+        fareCalculatorService.calculateFare(ticket);
+        assertEquals(new BigDecimal(0).setScale(2,RoundingMode.HALF_DOWN), ticket.getPrice());
+    }
+
 }
