@@ -11,12 +11,16 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.text.NumberFormat;
 import java.util.Date;
 
 public class FareCalculatorServiceTest {
-
     private static FareCalculatorService fareCalculatorService;
     private Ticket ticket;
+    double expectedPrice;
 
     @BeforeAll
     private static void setUp() {
@@ -39,7 +43,8 @@ public class FareCalculatorServiceTest {
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
-        assertEquals(ticket.getPrice(), Fare.CAR_RATE_PER_HOUR);
+        expectedPrice = Fare.CAR_RATE_PER_HOUR;
+        assertEquals(ticket.getPrice().setScale(2, RoundingMode.HALF_DOWN), new BigDecimal(expectedPrice).setScale(2));
     }
 
     @Test
@@ -53,7 +58,8 @@ public class FareCalculatorServiceTest {
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
-        assertEquals(ticket.getPrice(), Fare.BIKE_RATE_PER_HOUR);
+        expectedPrice = Fare.BIKE_RATE_PER_HOUR;
+        assertEquals(ticket.getPrice().setScale(2, RoundingMode.HALF_DOWN), new BigDecimal(expectedPrice).setScale(2));
     }
 
     @Test
@@ -75,7 +81,6 @@ public class FareCalculatorServiceTest {
         inTime.setTime( System.currentTimeMillis() + (  60 * 60 * 1000) );
         Date outTime = new Date();
         ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE,false);
-
         ticket.setInTime(inTime);
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
@@ -93,7 +98,8 @@ public class FareCalculatorServiceTest {
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
-        assertEquals((0.75 * Fare.BIKE_RATE_PER_HOUR), ticket.getPrice() );
+        expectedPrice = (0.75 * Fare.BIKE_RATE_PER_HOUR);
+        assertEquals(new BigDecimal(expectedPrice).setScale(2, RoundingMode.HALF_DOWN), ticket.getPrice().setScale(2) );
     }
 
     @Test
@@ -107,7 +113,8 @@ public class FareCalculatorServiceTest {
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
-        assertEquals( (0.75 * Fare.CAR_RATE_PER_HOUR) , ticket.getPrice());
+        expectedPrice = (0.75 * Fare.CAR_RATE_PER_HOUR);
+        assertEquals(new BigDecimal(expectedPrice).setScale(2, RoundingMode.HALF_DOWN) , ticket.getPrice());
     }
 
     @Test
@@ -121,7 +128,8 @@ public class FareCalculatorServiceTest {
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
-        assertEquals( (24 * Fare.CAR_RATE_PER_HOUR) , ticket.getPrice());
+        expectedPrice = (24 * Fare.CAR_RATE_PER_HOUR);
+        assertEquals(new BigDecimal(expectedPrice).setScale(2, RoundingMode.HALF_DOWN), ticket.getPrice());
     }
 
 }

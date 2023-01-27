@@ -3,6 +3,7 @@ package com.parkit.parkingsystem.service;
 import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.model.Ticket;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 
 public class FareCalculatorService {
@@ -16,11 +17,11 @@ public class FareCalculatorService {
 
         switch (ticket.getParkingSpot().getParkingType()){
             case CAR: {
-                ticket.setPrice(durationInHours * Fare.CAR_RATE_PER_HOUR);
+                ticket.setPrice(BigDecimal.valueOf(durationInHours * Fare.CAR_RATE_PER_HOUR));
                 break;
             }
             case BIKE: {
-                ticket.setPrice(durationInHours * Fare.BIKE_RATE_PER_HOUR);
+                ticket.setPrice(BigDecimal.valueOf(durationInHours * Fare.BIKE_RATE_PER_HOUR));
                 break;
             }
             default: throw new IllegalArgumentException("Unkown Parking Type");
