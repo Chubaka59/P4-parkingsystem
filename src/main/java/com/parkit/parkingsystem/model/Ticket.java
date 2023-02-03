@@ -42,7 +42,7 @@ public class Ticket {
     }
 
     public void setPrice(BigDecimal price) {
-        this.price = price.round(new MathContext(3, RoundingMode.HALF_DOWN)).setScale(2);
+        this.price = price.setScale(2,RoundingMode.HALF_DOWN);
     }
 
     public Date getInTime() {

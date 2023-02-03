@@ -1,10 +1,10 @@
 package com.parkit.parkingsystem.service;
 
 import com.parkit.parkingsystem.constants.Fare;
+import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.Ticket;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 
 public class FareCalculatorService {
 
@@ -19,16 +19,19 @@ public class FareCalculatorService {
         } else {
             switch (ticket.getParkingSpot().getParkingType()) {
                 case CAR: {
-                    ticket.setPrice(BigDecimal.valueOf(durationInHours * Fare.CAR_RATE_PER_HOUR));
+                    price = (BigDecimal.valueOf(durationInHours * Fare.CAR_RATE_PER_HOUR));
+                    ticket.setPrice(price);
                     break;
                 }
                 case BIKE: {
-                    ticket.setPrice(BigDecimal.valueOf(durationInHours * Fare.BIKE_RATE_PER_HOUR));
+                    price = (BigDecimal.valueOf(durationInHours * Fare.BIKE_RATE_PER_HOUR));
+                    ticket.setPrice(price);
                     break;
                 }
                 default:
-                    throw new IllegalArgumentException("Unkown Parking Type");
+                    throw new IllegalArgumentException("Unknown Parking Type");
             }
+
         }
     }
 
@@ -42,12 +45,27 @@ public class FareCalculatorService {
         double inHour = ticket.getInTime().getTime();
         double outHour = ticket.getOutTime().getTime();
 
-
         double duration = outHour - inHour;
         return duration / 3_600_000;
     }
 
     private static boolean isInvalidTime(Ticket ticket) {
         return (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime()));
+    }
+
+//    public boolean getRecurrentUser(String vehicleRegNumber){
+//        try {
+//            return this.ticketDAO.getTicket(vehicleRegNumber).getOutTime() != null;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return false;
+//    }
+
+    public void calculateFivePercentFree(Ticket ticket){
+        BigDecimal price;
+        price = ticket.getPrice();
+        price = price.subtract(price.multiply(FIVE_PERCENT_FREE));
+        ticket.setPrice(price);
     }
 }

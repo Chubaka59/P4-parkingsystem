@@ -8,6 +8,7 @@ import com.parkit.parkingsystem.service.FareCalculatorService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,7 +21,7 @@ import java.util.Date;
 public class FareCalculatorServiceTest {
     private static FareCalculatorService fareCalculatorService;
     private Ticket ticket;
-    double expectedPrice;
+    private double expectedPrice;
 
     @BeforeAll
     private static void setUp() {
@@ -146,4 +147,18 @@ public class FareCalculatorServiceTest {
         assertEquals(new BigDecimal(0).setScale(2,RoundingMode.HALF_DOWN), ticket.getPrice());
     }
 
+    @Test
+    public void calculateFareWithReductionForRecurrentUser(){
+        Date inTime = new Date();
+        inTime.setTime( System.currentTimeMillis() - (  120 * 60 * 1000) );
+        Date outTime = new Date();
+        ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
+        ticket.setInTime(inTime);
+        ticket.setOutTime(outTime);
+        ticket.setParkingSpot(parkingSpot);
+        ticket.setVehicleRegNumber("ABCDEF");
+        fareCalculatorService.calculateFare(ticket);
+        expectedPrice = ((2 * Fare.CAR_RATE_PER_HOUR) - Fare.CAR_RATE_PER_HOUR * 5 / 100);
+        assertEquals(new BigDecimal(expectedPrice).setScale(2, RoundingMode.HALF_DOWN), ticket.getPrice());
+    }
 }
