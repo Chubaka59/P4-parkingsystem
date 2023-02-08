@@ -93,8 +93,6 @@ public class ParkingDataBaseIT {
 
         //WHEN the vehicle leave the parking
         parkingService.processExitingVehicle();
-        //TODO: check that the fare generated and out time are populated correctly in the database --- under 1€ price, there is 3 decimals and refactor the incoming vehicle method
-
 
         //THEN an outTime and a fare is generated
         Ticket outgoingTicket = ticketDAO.getLastTicket("ABCDEF");
