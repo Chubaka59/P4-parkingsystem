@@ -127,7 +127,6 @@ public class ParkingService {
     }
 
     public boolean getRecurrentUser(String vehicleRegNumber){
-            return (ticketDAO.getTerminateTicket(vehicleRegNumber).getOutTime() != null);
-
+            return (ticketDAO.getTicketCount(vehicleRegNumber) > 0 );
     }
 }

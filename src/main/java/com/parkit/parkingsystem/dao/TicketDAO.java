@@ -87,7 +87,7 @@ public class TicketDAO {
         return false;
     }
 
-    public Ticket getTerminateTicket(String vehicleRegNumber) {
+    public int getTicketCount(String vehicleRegNumber) {
         Connection con = null;
         Ticket ticket = null;
         try {
@@ -109,7 +109,7 @@ public class TicketDAO {
             dataBaseConfig.closeResultSet(rs);
             dataBaseConfig.closePreparedStatement(ps);
         }catch (Exception ex){
-            logger.error("Error fetching next available slot",ex);
+            logger.error("Error counting tickets",ex);
         }finally {
             dataBaseConfig.closeConnection(con);
             return ticket;

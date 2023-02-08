@@ -97,7 +97,7 @@ public class ParkingDataBaseIT {
 
 
         //THEN an outTime and a fare is generated
-        Ticket outgoingTicket = ticketDAO.getTerminateTicket("ABCDEF");
+        Ticket outgoingTicket = ticketDAO.getLastTicket("ABCDEF");
         Date date = new Date();
         Date nearestSecond = DateUtils.round (date, Calendar.SECOND);
         Timestamp expectedDate = new Timestamp(nearestSecond.getTime());

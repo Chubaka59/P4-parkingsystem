@@ -53,15 +53,6 @@ public class FareCalculatorService {
         return (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime()));
     }
 
-//    public boolean getRecurrentUser(String vehicleRegNumber){
-//        try {
-//            return this.ticketDAO.getTicket(vehicleRegNumber).getOutTime() != null;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return false;
-//    }
-
     public void calculateFivePercentFree(Ticket ticket){
         BigDecimal price;
         price = ticket.getPrice();

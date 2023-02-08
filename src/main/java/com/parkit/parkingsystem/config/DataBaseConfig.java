@@ -3,7 +3,6 @@ package com.parkit.parkingsystem.config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
@@ -22,8 +21,14 @@ public class DataBaseConfig {
         String fileLocation="src/main/resources/DatabaseCredentials.property";
         Properties dbProperties = new Properties();
         dbProperties.load(new FileReader(fileLocation));
+        String dbUrl = dbProperties.getProperty(DB_URL_PROP_KEY);
+        String username = dbProperties.getProperty(DB_USERNAME_PROP_KEY);
+        String password = dbProperties.getProperty(DB_PASSWORD_PROP_KEY);
+        dbProperties.remove(DB_URL_PROP_KEY);
+        dbProperties.remove(DB_USERNAME_PROP_KEY);
+        dbProperties.remove(DB_PASSWORD_PROP_KEY);
         Class.forName("com.mysql.cj.jdbc.Driver");
-        return DriverManager.getConnection(dbProperties.getProperty(DB_URL_PROP_KEY), dbProperties.getProperty(DB_USERNAME_PROP_KEY), dbProperties.getProperty(DB_PASSWORD_PROP_KEY));
+        return DriverManager.getConnection(dbUrl, username, password);
     }
 
     public void closeConnection(Connection con){
