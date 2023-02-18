@@ -84,10 +84,14 @@ public class ParkingDataBaseIT {
         Ticket incomingTicket = new Ticket();
         Date incomingDate = new Date();
         incomingDate.setTime(System.currentTimeMillis() - 120 * 60 * 1000);
+
         incomingTicket.setParkingSpot(parkingService.getNextParkingNumberIfAvailable());
         incomingTicket.setInTime(incomingDate);
         incomingTicket.setVehicleRegNumber("ABCDEF");
         incomingTicket.setPrice(new BigDecimal(0));
+
+        BigDecimal expectedPrice = new BigDecimal(2 * Fare.CAR_RATE_PER_HOUR).setScale(2, RoundingMode.HALF_DOWN);
+
         ticketDAO.saveTicket(incomingTicket);
 
         //WHEN the vehicle leave the parking
