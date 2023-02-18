@@ -100,12 +100,11 @@ public class ParkingServiceTest {
         //WHEN
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenThrow(expectedException);
 
-        Exception throwsException = assertThrows(Exception.class, () -> parkingService.getVehicleRegNumber());
+       Exception throwsException = assertThrows(Exception.class, () -> parkingService.getVehicleRegNumber());
 
         // THEN
         Assertions.assertThat(throwsException)
                 .isInstanceOf(Exception.class)
                 .hasMessage(expectedException.getMessage());
-
     }
 }

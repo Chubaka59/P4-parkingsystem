@@ -5,32 +5,32 @@ import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.FareCalculatorService;
-import org.junit.jupiter.api.BeforeAll;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
-import java.text.NumberFormat;
 import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FareCalculatorServiceTest {
     private static FareCalculatorService fareCalculatorService;
     private Ticket ticket;
     private double expectedPrice;
 
-    @BeforeAll
-    private static void setUp() {
-        fareCalculatorService = new FareCalculatorService();
-    }
 
     @BeforeEach
-    private void setUpPerTest() {
+    public void setUpPerTest() {
+        fareCalculatorService = new FareCalculatorService();
         ticket = new Ticket();
+    }
+
+    @Test
+    public void calculateFare(){
+
     }
 
     @Test
@@ -145,5 +145,24 @@ public class FareCalculatorServiceTest {
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
         assertEquals(new BigDecimal(0).setScale(2,RoundingMode.HALF_DOWN), ticket.getPrice());
+    }
+
+    @Test
+    public void calculateFivePercentFreeTest(){
+        //GIVEN
+        BigDecimal price = BigDecimal.valueOf(3);
+        ticket.setPrice(price);
+
+        //WHEN
+        fareCalculatorService.calculateFivePercentFree(ticket);
+
+        //THEN
+        BigDecimal priceWithFivePercentFree = price.multiply(fareCalculatorService.FIVE_PERCENT_FREE);
+        BigDecimal expectedPrice = price.subtract(priceWithFivePercentFree).setScale(2, RoundingMode.HALF_DOWN);
+        assertEquals(expectedPrice, ticket.getPrice());
+    }
+
+    private BigDecimal toBigDecimal(double price){
+        return BigDecimal.valueOf(price).setScale(2, RoundingMode.HALF_DOWN);
     }
 }

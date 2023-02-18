@@ -8,31 +8,33 @@ import java.math.BigDecimal;
 
 public class FareCalculatorService {
 
-    public void calculateFare(Ticket ticket){
-        if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
-            throw new IllegalArgumentException("Out time provided is incorrect:"+ticket.getOutTime().toString());
+    public static final BigDecimal FIVE_PERCENT_FREE = BigDecimal.valueOf(.05);
+    public TicketDAO ticketDAO = new TicketDAO();
+
+    public void calculateFare(Ticket ticket) {
+        if (isInvalidTime(ticket)) {
+            throw new IllegalArgumentException("Out time provided is incorrect:" + ticket.getOutTime().toString());
         }
 
         double durationInHours = getDurationInHours(ticket);
-        if (durationInHours < 0.5) {
-            ticket.setPrice(BigDecimal.valueOf(0));
-        } else {
+
+        BigDecimal price = BigDecimal.valueOf(0);
+
+        if (durationInHours > 0.5) {
             switch (ticket.getParkingSpot().getParkingType()) {
                 case CAR: {
                     price = (BigDecimal.valueOf(durationInHours * Fare.CAR_RATE_PER_HOUR));
-                    ticket.setPrice(price);
                     break;
                 }
                 case BIKE: {
                     price = (BigDecimal.valueOf(durationInHours * Fare.BIKE_RATE_PER_HOUR));
-                    ticket.setPrice(price);
                     break;
                 }
                 default:
                     throw new IllegalArgumentException("Unknown Parking Type");
             }
-
         }
+        ticket.setPrice(price);
     }
 
     /**

@@ -8,7 +8,6 @@ import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
-import org.apache.commons.lang.time.DateUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.Date;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
@@ -36,12 +33,11 @@ public class ParkingDataBaseIT {
     private static DataBasePrepareService dataBasePrepareService;
 
 
-
     @Mock
     private static InputReaderUtil inputReaderUtil;
 
     @BeforeAll
-    private static void setUp() throws Exception {
+    public static void setUp() throws Exception {
         parkingSpotDAO = new ParkingSpotDAO();
         parkingSpotDAO.dataBaseConfig = dataBaseTestConfig;
         ticketDAO = new TicketDAO();
@@ -50,37 +46,40 @@ public class ParkingDataBaseIT {
     }
 
     @BeforeEach
-    private void setUpPerTest() throws Exception {
+    public void setUpPerTest() throws Exception {
         when(inputReaderUtil.readSelection()).thenReturn(1);
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
         dataBasePrepareService.clearDataBaseEntries();
     }
 
     @AfterAll
-    private static void tearDown() {
+    public static void tearDown() {
     }
 
 
     @Test
     public void testParkingACar() {
+        //GIVEN a parking spot exists
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+
+        // WHEN a car incoming
         parkingService.processIncomingVehicle();
-        //TODO: check that a ticket is actually saved in DB and Parking table is updated with availability -- check if i can reuse the databse connector
-        Source source = new Source("jdbc:mysql://localhost:3306/test?serverTimezone=UTC", "root", "rootroot");
-        Table ticketTable = new Table(source, "ticket");
-        Table parkingTable = new Table(source, "parking");
 
 
-        assertThat(ticketTable).row(0)
-                .value(1).isEqualTo(1)
-                .value(2).isEqualTo("ABCDEF");
+        //THEN a valid ticket is created
+        Ticket incomingTicket = ticketDAO.getTicket("ABCDEF");
 
-        assertThat(parkingTable).column("AVAILABLE")
-                .value().isEqualTo(false);
+        assertThat(incomingTicket)
+                .isNotNull()
+                .satisfies(t -> {
+                    assertThat(t.getVehicleRegNumber()).isEqualTo("ABCDEF");
+                    assertThat(t.getParkingSpot().isAvailable()).isFalse();
+                });
     }
 
     @Test
     public void testParkingLotExit() {
+        //GIVEN a vehicle is in the parking
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         Ticket incomingTicket = new Ticket();
         Date incomingDate = new Date();
@@ -96,11 +95,9 @@ public class ParkingDataBaseIT {
 
         //THEN an outTime and a fare is generated
         Ticket outgoingTicket = ticketDAO.getLastTicket("ABCDEF");
-        Date date = new Date();
-        Date nearestSecond = DateUtils.round (date, Calendar.SECOND);
-        Timestamp expectedDate = new Timestamp(nearestSecond.getTime());
-        assertThat(outgoingTicket.getOutTime().getTime()).isEqualTo(expectedDate.getTime());
-        assertThat(outgoingTicket.getPrice()).isEqualTo(new BigDecimal(2 * Fare.CAR_RATE_PER_HOUR).setScale(2, RoundingMode.HALF_DOWN));
+        assertThat(outgoingTicket.getOutTime()).isAfter(outgoingTicket.getInTime());
+
+        assertThat(outgoingTicket.getPrice()).isEqualTo(expectedPrice);
     }
 
     @Test

@@ -105,13 +105,9 @@ public class ParkingService {
             Date outTime = new Date();
             ticket.setOutTime(outTime);
             fareCalculatorService.calculateFare(ticket);
-            try {
-                if (getRecurrentUser(vehicleRegNumber) == true) {
+                if (getRecurrentUser(vehicleRegNumber)) {
                     fareCalculatorService.calculateFivePercentFree(ticket);
                 }
-            } catch (Exception e){
-                logger.info("There is no terminate ticket for this vehicle");
-            }
             if(ticketDAO.updateTicket(ticket)) {
                 ParkingSpot parkingSpot = ticket.getParkingSpot();
                 parkingSpot.setAvailable(true);
