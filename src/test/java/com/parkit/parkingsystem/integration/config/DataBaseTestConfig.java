@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Properties;
 
@@ -16,19 +17,24 @@ public class DataBaseTestConfig extends DataBaseConfig {
     private static final String DB_USERNAME_PROP_KEY = "dbUsername";
     private static final String DB_PASSWORD_PROP_KEY = "dbPassword";
 
-    public Connection getConnection() throws ClassNotFoundException, SQLException, IOException {
-        logger.info("Create DB connection");
+    public Connection getConnection() throws ClassNotFoundException, IOException {
         String fileLocation = "src/main/resources/TestDatabaseCredentials.property";
         Properties dbProperties = new Properties();
-        dbProperties.load(new FileReader(fileLocation));
-        String dbUrl = dbProperties.getProperty(DB_URL_PROP_KEY);
-        String username = dbProperties.getProperty(DB_USERNAME_PROP_KEY);
-        String password = dbProperties.getProperty(DB_PASSWORD_PROP_KEY);
-        dbProperties.remove(DB_URL_PROP_KEY);
-        dbProperties.remove(DB_USERNAME_PROP_KEY);
-        dbProperties.remove(DB_PASSWORD_PROP_KEY);
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        return DriverManager.getConnection(dbUrl, username, password);
+        try (FileReader fileReader = new FileReader(fileLocation, StandardCharsets.UTF_8)) {
+            logger.info("Create DB connection");
+            dbProperties.load(fileReader);
+            String dbUrl = dbProperties.getProperty(DB_URL_PROP_KEY);
+            String username = dbProperties.getProperty(DB_USERNAME_PROP_KEY);
+            String password = dbProperties.getProperty(DB_PASSWORD_PROP_KEY);
+            dbProperties.remove(DB_URL_PROP_KEY);
+            dbProperties.remove(DB_USERNAME_PROP_KEY);
+            dbProperties.remove(DB_PASSWORD_PROP_KEY);
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            return DriverManager.getConnection(dbUrl, username, password);
+        } catch (SQLException e) {
+            logger.error("Error while connecting to database");
+            return null;
+        }
     }
 
     public void closeConnection(Connection con) {

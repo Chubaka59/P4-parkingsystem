@@ -1,7 +1,6 @@
 package com.parkit.parkingsystem.service;
 
 import com.parkit.parkingsystem.constants.Fare;
-import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.Ticket;
 
 import java.math.BigDecimal;
@@ -9,7 +8,6 @@ import java.math.BigDecimal;
 public class FareCalculatorService {
 
     public static final BigDecimal FIVE_PERCENT_FREE = BigDecimal.valueOf(.05);
-    public TicketDAO ticketDAO = new TicketDAO();
 
     /**
      * Calculate the fare when a vehicle is leaving
