@@ -62,11 +62,12 @@ public class TicketDAO {
             }
             dataBaseConfig.closeResultSet(rs);
             dataBaseConfig.closePreparedStatement(ps);
+            return ticket;
         }catch (Exception ex){
             logger.error("Error fetching next available slot",ex);
+            return null;
         }finally {
             dataBaseConfig.closeConnection(con);
-            return ticket;
         }
     }
 
@@ -130,11 +131,12 @@ public class TicketDAO {
             }
             dataBaseConfig.closeResultSet(rs);
             dataBaseConfig.closePreparedStatement(ps);
+            return ticket;
         }catch (Exception ex){
             logger.error("Error fetching next available slot",ex);
+            return null;
         }finally {
             dataBaseConfig.closeConnection(con);
-            return ticket;
         }
     }
 }

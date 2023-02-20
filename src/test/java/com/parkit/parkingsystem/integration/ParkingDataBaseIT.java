@@ -100,7 +100,6 @@ public class ParkingDataBaseIT {
         //THEN an outTime and a fare is generated
         Ticket outgoingTicket = ticketDAO.getLastTicket("ABCDEF");
         assertThat(outgoingTicket.getOutTime()).isAfter(outgoingTicket.getInTime());
-
         assertThat(outgoingTicket.getPrice()).isEqualTo(expectedPrice);
     }
 

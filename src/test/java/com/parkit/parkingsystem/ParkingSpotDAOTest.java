@@ -47,8 +47,10 @@ public class ParkingSpotDAOTest {
     @ParameterizedTest
     @MethodSource("parkingTypes")
     public void getNextAvailableSlotTest(ParkingType parkingType, int expectedSpots){
+        //WHEN a request to get an available slot is sent
         int parkingSpotNumber = parkingSpotDAO.getNextAvailableSlot(parkingType);
 
+        //THEN a slot is assigned
         assertEquals(expectedSpots, parkingSpotNumber);
     }
 
@@ -56,10 +58,13 @@ public class ParkingSpotDAOTest {
     @ParameterizedTest
     @MethodSource("parkingTypes")
     public void updateParkingTest(ParkingType parkingType, int spot){
+        //GIVEN a specific parking spot is assigned
         ParkingSpot parkingSpot = new ParkingSpot(spot, parkingType, false);
 
+        //WHEN the parking spot is updated
         boolean response = parkingSpotDAO.updateParking(parkingSpot);
 
+        //THEN the parking spot has been correctly updated
         assertTrue(response);
     }
 }

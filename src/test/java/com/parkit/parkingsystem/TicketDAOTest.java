@@ -46,7 +46,6 @@ public class TicketDAOTest {
 
     @Test
     public void saveTicketTest() {
-
         //GIVEN a ticket is init
         Date inTime = new Date();
         when(ticket.getParkingSpot()).thenReturn(parkingSpot);
@@ -55,11 +54,9 @@ public class TicketDAOTest {
         when(ticket.getInTime()).thenReturn(inTime);
 
         // WHEN the ticket is saved
-
         Boolean response = ticketDAO.saveTicket(ticket);
 
         // THEN the method return true
-
         assertTrue(response);
 
     }
@@ -77,7 +74,7 @@ public class TicketDAOTest {
         //WHEN we get a ticket
         Ticket returnedTicket = ticketDAO.getTicket("ABCDEF");
 
-        //THEN we get the ticket informations
+        //THEN we get the ticket information
         assertEquals(1,returnedTicket.getParkingSpot().getId());
         assertEquals("ABCDEF",returnedTicket.getVehicleRegNumber());
         assertEquals(BigDecimal.valueOf(0).setScale(2),returnedTicket.getPrice());
@@ -108,6 +105,7 @@ public class TicketDAOTest {
 
     @Test
     public void getTicketCountTest(){
+        //GIVEN a ticket is already saved
         Date inTime = new Date();
         Date outTime = new Date();
         when(ticket.getParkingSpot()).thenReturn(parkingSpot);
@@ -119,8 +117,31 @@ public class TicketDAOTest {
         ticketDAO.saveTicket(ticket);
         ticketDAO.updateTicket(ticket);
 
+        //WHEN the system check if there is already a ticket in DB for this vehicle
         int count = ticketDAO.getTicketCount("ABCDEF");
 
+        //THEN the count is returned
         assertEquals(1, count);
+    }
+
+    @Test
+    public void getLastTicketTest(){
+        //GIVEN a ticket is saved
+        Date inTime = new Date();
+        Date roundedInTime = DateUtils.round(inTime, Calendar.SECOND);
+        when(ticket.getParkingSpot()).thenReturn(parkingSpot);
+        when(ticket.getVehicleRegNumber()).thenReturn("ABCDEF");
+        when(ticket.getPrice()).thenReturn(BigDecimal.valueOf(0));
+        when(ticket.getInTime()).thenReturn(inTime);
+        ticketDAO.saveTicket(ticket);
+
+        //WHEN we get a ticket
+        Ticket returnedTicket = ticketDAO.getLastTicket("ABCDEF");
+
+        //THEN we get the ticket information
+        assertEquals(1,returnedTicket.getParkingSpot().getId());
+        assertEquals("ABCDEF",returnedTicket.getVehicleRegNumber());
+        assertEquals(BigDecimal.valueOf(0).setScale(2),returnedTicket.getPrice());
+        assertEquals(roundedInTime,returnedTicket.getInTime());
     }
 }

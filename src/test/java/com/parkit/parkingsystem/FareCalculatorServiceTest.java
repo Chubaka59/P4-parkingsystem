@@ -169,6 +169,11 @@ public class FareCalculatorServiceTest {
         assertEquals(expectedPrice, ticket.getPrice());
     }
 
+    /**
+     * Convert double to BigDecimal with a scale of 2
+     * @param price
+     * @return price in BigDecimal
+     */
     private BigDecimal toBigDecimal(double price){
         return BigDecimal.valueOf(price).setScale(2, RoundingMode.HALF_DOWN);
     }

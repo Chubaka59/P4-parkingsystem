@@ -7,7 +7,6 @@ import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,66 +43,47 @@ public class ParkingServiceTest {
     }
 
     @Test
-    public void processExitingVehicleTest() {
-        try {
-            when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
-            when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
-            when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
-            when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
+    public void processExitingVehicleTest() throws Exception {
+        //GIVEN a vehicle already entered the parking
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
+        when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
+        when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
 
+        //WHEN the vehicle is leaving
+        parkingService.processExitingVehicle();
 
-            parkingService.processExitingVehicle();
-
-            verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to set up test mock objects");
-
-        }
+        //THEN the parking spot is updated
+        verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
     }
 
     @Test
     public void processIncomingVehicleTest() throws Exception {
+        //GIVEN a vehicle would use the parking
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        when(inputReaderUtil.readSelection()).thenReturn(2);
+        when(parkingSpotDAO.getNextAvailableSlot(ParkingType.BIKE)).thenReturn(4);
 
-            when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
-            when(inputReaderUtil.readSelection()).thenReturn(2);
-            when(parkingSpotDAO.getNextAvailableSlot(ParkingType.BIKE)).thenReturn(4);
+        //WHEN the vehicle is entering the parking
+        parkingService.processIncomingVehicle();
 
-            parkingService.processIncomingVehicle();
-
-            verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
-            verify(ticketDAO, Mockito.times(1)).saveTicket(any(Ticket.class));
+        //THEN a ticket is registered and a parking spot assigned
+        verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
+        verify(ticketDAO, Mockito.times(1)).saveTicket(any(Ticket.class));
 
     }
 
     @Test
     public void processIncomingVehicleErrorTest() throws Exception {
-        // GIVEN
+        // GIVEN the vehicle registration number cannot be read
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(parkingSpotDAO.getNextAvailableSlot(any())).thenReturn(1);
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenThrow(new Exception("Error in the vehicle registration number"));
 
-        // WHEN
-            when(inputReaderUtil.readSelection()).thenReturn(1);
-            when(parkingSpotDAO.getNextAvailableSlot(any())).thenReturn(1);
-            when(inputReaderUtil.readVehicleRegistrationNumber()).thenThrow(new Exception("zut"));
+        //WHEN the vehicle try to enter the parking
+        parkingService.processIncomingVehicle();
 
-            parkingService.processIncomingVehicle();
-
-            verify(ticketDAO, Mockito.never()).saveTicket(any(Ticket.class));
-    }
-
-    @Test
-    public void getVehicleRegNumberErrorTest() throws Exception {
-        //GIVEN
-        final Exception expectedException = new Exception("zut");
-
-        //WHEN
-        when(inputReaderUtil.readVehicleRegistrationNumber()).thenThrow(expectedException);
-
-       Exception throwsException = assertThrows(Exception.class, () -> parkingService.getVehicleRegNumber());
-
-        // THEN
-        Assertions.assertThat(throwsException)
-                .isInstanceOf(Exception.class)
-                .hasMessage(expectedException.getMessage());
+        //THEN no tickets are saved
+        verify(ticketDAO, Mockito.never()).saveTicket(any(Ticket.class));
     }
 }

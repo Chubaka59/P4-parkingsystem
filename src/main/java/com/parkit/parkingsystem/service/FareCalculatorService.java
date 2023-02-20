@@ -11,6 +11,10 @@ public class FareCalculatorService {
     public static final BigDecimal FIVE_PERCENT_FREE = BigDecimal.valueOf(.05);
     public TicketDAO ticketDAO = new TicketDAO();
 
+    /**
+     * Calculate the fare when a vehicle is leaving
+     * @param ticket : the ticket of the vehicle
+     */
     public void calculateFare(Ticket ticket) {
         if (isInvalidTime(ticket)) {
             throw new IllegalArgumentException("Out time provided is incorrect:" + ticket.getOutTime().toString());
@@ -39,10 +43,9 @@ public class FareCalculatorService {
 
     /**
      * calculate the duration in hours
-     * @param ticket : the ticket vehicle
+     * @param ticket : the ticket of the vehicle
      * @return double time in hours
      */
-
     private static double getDurationInHours(Ticket ticket) {
         double inHour = ticket.getInTime().getTime();
         double outHour = ticket.getOutTime().getTime();
@@ -51,10 +54,19 @@ public class FareCalculatorService {
         return duration / 3_600_000;
     }
 
+    /**
+     * Check that the outTime is not null or not before the inTime
+     * @param ticket : the ticket of the vehicle
+     * @return a boolean
+     */
     private static boolean isInvalidTime(Ticket ticket) {
         return (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime()));
     }
 
+    /**
+     * Calculate the fare with five percent free
+     * @param ticket : the ticket of the vehicle
+     */
     public void calculateFivePercentFree(Ticket ticket){
         BigDecimal price;
         price = ticket.getPrice();

@@ -28,13 +28,16 @@ public class ParkingService {
         this.ticketDAO = ticketDAO;
     }
 
+    /**
+     * assign a parking spot and save a ticket in DB
+     */
     public void processIncomingVehicle() {
         try{
             ParkingSpot parkingSpot = getNextParkingNumberIfAvailable();
             if(parkingSpot !=null && parkingSpot.getId() > 0){
                 String vehicleRegNumber = getVehicleRegNumber();
                 parkingSpot.setAvailable(false);
-                parkingSpotDAO.updateParking(parkingSpot);//allot this parking space and mark it's availability as false
+                parkingSpotDAO.updateParking(parkingSpot);//allot this parking space and mark its availability as false
 
                 Date inTime = new Date();
                 Ticket ticket = new Ticket();
@@ -55,11 +58,20 @@ public class ParkingService {
         }
     }
 
+    /**
+     * Get the vehicle registration number from the reader
+     * @return the vehicle registration number as a string
+     * @throws Exception
+     */
     public String getVehicleRegNumber() throws Exception {
         System.out.println("Please type the vehicle registration number and press enter key");
         return inputReaderUtil.readVehicleRegistrationNumber();
     }
 
+    /**
+     * check if a parking spot is available
+     * @return a parking spot
+     */
     public ParkingSpot getNextParkingNumberIfAvailable(){
         int parkingNumber=0;
         ParkingSpot parkingSpot = null;
@@ -79,6 +91,10 @@ public class ParkingService {
         return parkingSpot;
     }
 
+    /**
+     * Get the vehicle type from the reader
+     * @return a parking type
+     */
     private ParkingType getVehicleType(){
         System.out.println("Please select vehicle type from menu");
         System.out.println("1 CAR");
@@ -98,6 +114,9 @@ public class ParkingService {
         }
     }
 
+    /**
+     * Get the ticket of this vehicle and fill the outTime to calculate the fare and set the spot available
+     */
     public void processExitingVehicle() {
         try{
             String vehicleRegNumber = getVehicleRegNumber();
@@ -122,6 +141,11 @@ public class ParkingService {
         }
     }
 
+    /**
+     * check in DB if this vehicle has a terminated ticket
+     * @param vehicleRegNumber : the vehicle registration number
+     * @return a boolean
+     */
     public boolean getRecurrentUser(String vehicleRegNumber){
             return (ticketDAO.getTicketCount(vehicleRegNumber) > 0 );
     }
