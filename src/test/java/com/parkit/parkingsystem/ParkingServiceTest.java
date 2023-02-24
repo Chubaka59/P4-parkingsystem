@@ -10,19 +10,24 @@ import com.parkit.parkingsystem.util.InputReaderUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Date;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ParkingServiceTest {
 
     private static ParkingService parkingService;
-
     @Mock
     private static InputReaderUtil inputReaderUtil;
     @Mock
@@ -85,5 +90,79 @@ public class ParkingServiceTest {
 
         //THEN no tickets are saved
         verify(ticketDAO, Mockito.never()).saveTicket(any(Ticket.class));
+    }
+
+    private static Stream<Arguments> parkingTypes(){
+        return Stream.of(
+                Arguments.of(ParkingType.CAR, 1),
+                Arguments.of(ParkingType.BIKE, 2)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("parkingTypes")
+    public void getNextParkingNumberIfAvailableTest(ParkingType expectedParkingType, int expectedId) {
+        //GIVEN a vehicle is comming
+
+        when(inputReaderUtil.readSelection()).thenReturn(expectedId);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(expectedId);
+
+        //WHEN the system check if a slot is available
+        ParkingSpot response = parkingService.getNextParkingNumberIfAvailable();
+
+        //THEN the system send a slot as response
+        assertThat(response)
+                .isNotNull()
+                .satisfies( parkingSpot -> {
+                    assertThat(parkingSpot.getId()).isEqualTo(expectedId);
+                    assertThat(parkingSpot.getParkingType()).isEqualTo(expectedParkingType);
+                    assertThat(parkingSpot.isAvailable()).isTrue();
+                });
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("parkingTypes")
+    public void getNextParkingNumberIfAvailableErrorTest(ParkingType expectedParkingType, int expectedId) {
+        //GIVEN there is no parking spot available
+        when(inputReaderUtil.readSelection()).thenReturn(expectedId);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(0);
+
+        //WHEN the system check if a slot is available
+        ParkingSpot response = parkingService.getNextParkingNumberIfAvailable();
+
+        //THEN the system send a response
+        assertThat(response)
+                .isNull();
+    }
+    
+    @Test
+    public void getNextParkingNumberIfAvailableErrorWithImpossibleType() {
+        //GIVEN a vehicle is coming
+        when(inputReaderUtil.readSelection()).thenReturn(3);
+
+        //WHEN the system check if a slot is available
+        ParkingSpot response = parkingService.getNextParkingNumberIfAvailable();
+
+        //THEN the system send a response
+        assertThat(response).isNull();
+    }
+
+    @Test
+    public void processExitingVehicleForRecurrentUser() throws Exception {
+        //GIVEN recurrent user is using the parking
+        BigDecimal expectedPrice = BigDecimal.valueOf(1.42);
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
+        when(ticketDAO.getTicketCount(anyString())).thenReturn(1);
+        when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
+        when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
+
+        //WHEN he leaves
+        parkingService.processExitingVehicle();
+
+        //THEN he gets a reduction on the price
+        assertThat(ticket.getPrice()).isEqualTo(expectedPrice);
+        verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
     }
 }

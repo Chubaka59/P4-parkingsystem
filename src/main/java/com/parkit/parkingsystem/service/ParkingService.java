@@ -142,7 +142,7 @@ public class ParkingService {
     }
 
     /**
-     * check in DB if this vehicle has a terminated ticket
+     * check in DB if this vehicle has a closed ticket
      * @param vehicleRegNumber : the vehicle registration number
      * @return a boolean
      */
