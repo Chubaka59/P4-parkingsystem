@@ -159,7 +159,7 @@ public class FareCalculatorServiceTest {
         BigDecimal price = BigDecimal.valueOf(3);
         ticket.setPrice(price);
 
-        BigDecimal priceWithFivePercentFree = price.multiply(fareCalculatorService.FIVE_PERCENT_FREE);
+        BigDecimal priceWithFivePercentFree = price.multiply(FareCalculatorService.FIVE_PERCENT_FREE);
         BigDecimal expectedPrice = price.subtract(priceWithFivePercentFree).setScale(2, RoundingMode.HALF_DOWN);
 
         //WHEN the five percent free can be applied
