@@ -81,8 +81,6 @@ public class ParkingServiceTest {
     @Test
     public void processIncomingVehicleErrorTest() throws Exception {
         // GIVEN the vehicle registration number cannot be read
-        when(inputReaderUtil.readSelection()).thenReturn(1);
-        when(parkingSpotDAO.getNextAvailableSlot(any())).thenReturn(1);
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenThrow(new Exception("Error in the vehicle registration number"));
 
         //WHEN the vehicle try to enter the parking
@@ -164,5 +162,18 @@ public class ParkingServiceTest {
         //THEN he gets a reduction on the price
         assertThat(ticket.getPrice()).isEqualTo(expectedPrice);
         verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
+    }
+
+    @Test
+    public void processIncomingVehicleWhileAlreadyInTheParking() throws Exception {
+        //GIVEN the vehicle is already in the parking
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
+
+        //WHEN the vehicle try to enter once again
+        parkingService.processIncomingVehicle();
+
+        //THEN no ticket is created
+        verify(ticketDAO, Mockito.never()).saveTicket(any(Ticket.class));
     }
 }
